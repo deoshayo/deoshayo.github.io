@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+compile '/**/*.html' do
+  layout '/default.*'
+end
+
+compile '/**/*.md' do
+  filter :kramdown
+  layout '/default.*'
+  filter :better_relativize_paths, type: :html
+end
+
+compile '/styles/main.scss' do
+  filter :sass, syntax: :scss, style: :compressed
+  filter :autoprefixer, browsers: [
+    '> 1%',
+    'last 2 versions',
+    'Firefox ESR',
+    'iOS >= 8',
+  ]
+  write item.identifier.without_ext + '.css'
+end
+ignore '/**/*.scss'
+
+route '/**/*.{html,md}' do
+  if item.identifier =~ '/index.*'
+    '/index.html'
+  else
+    item.identifier.without_ext + '/index.html'
+  end
+end
+
+compile '/**/*' do
+  write item.identifier.to_s
+end
+
+layout '/**/*', :erb
